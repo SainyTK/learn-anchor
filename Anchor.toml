@@ -7,6 +7,7 @@ skip-lint = false
 [programs.localnet]
 basic_storage = "FSgQUnc1qogXqmYz5A4niVAkzWBSgWXECUe6rWa1extb"
 learn_anchor = "7Z16QQG7NkFJxG7aHL73NQUSZ9XvmNj16VLx7HC1FJ1T"
+mapping_storage = "CyZPQjTKMXF7f6MSite1AAWVTGyPRjVS963mbVStEvZY"
 
 [registry]
 url = "https://api.apr.dev"
