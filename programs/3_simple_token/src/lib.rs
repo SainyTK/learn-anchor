@@ -10,18 +10,16 @@ pub mod simple_token {
     pub fn initialize_owner(ctx: Context<InitializeOwner>) -> Result<()> {
         let owner_acc = &mut ctx.accounts.owner;
         owner_acc.owner = ctx.accounts.signer.key();
-
-        msg!("Owner {}", ctx.accounts.signer.key());
         Ok(())
     }
 
-    pub fn initialize_balance(ctx: Context<InitializeBalance>) -> Result<()> {
+    pub fn initialize_balance(ctx: Context<InitializeBalance>, authority: Pubkey) -> Result<()> {
         let balance_acc = &mut ctx.accounts.balance;
         balance_acc.balance = 0;
         Ok(())
     }
 
-    pub fn mint(ctx: Context<Mint>, to: Pubkey, amount: u64) -> Result<()> {
+    pub fn mint(ctx: Context<Mint>, amount: u64) -> Result<()> {
         let owner_acc = &mut ctx.accounts.owner;
         let balance_acc = &mut ctx.accounts.balance;
 
@@ -32,7 +30,7 @@ pub mod simple_token {
         Ok(())
     }
 
-    pub fn transfer(ctx: Context<Transfer>, to: Pubkey, amount: u64) -> Result<()> {
+    pub fn transfer(ctx: Context<Transfer>, amount: u64) -> Result<()> {
         let from_acc = &mut ctx.accounts.from_acc;
         let to_acc = &mut ctx.accounts.to_acc;
 
@@ -62,12 +60,13 @@ pub struct InitializeOwner<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(authority: Pubkey)]
 pub struct InitializeBalance<'info> {
     #[account(
         init,
         payer = signer,
         space = size_of::<BalanceAccount>() + 8,
-        seeds = [&signer.key().as_ref()],
+        seeds = [&authority.key().as_ref()],
         bump
     )]
     pub balance: Account<'info, BalanceAccount>,
@@ -77,13 +76,8 @@ pub struct InitializeBalance<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(to: Pubkey, amount: u64)]
 pub struct Mint<'info> {
-    #[account(
-        mut,
-        seeds = [&to.as_ref()],
-        bump
-    )]
+    #[account(mut)]
     pub balance: Account<'info, BalanceAccount>,
     #[account(
         seeds = ["owner".as_ref()],
@@ -95,13 +89,8 @@ pub struct Mint<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(to: Pubkey, amount: u64)]
 pub struct Transfer<'info> {
-    #[account(
-        mut,
-        seeds = [&to.as_ref()],
-        bump
-    )]
+    #[account(mut)]
     pub to_acc: Account<'info, BalanceAccount>,
     #[account(
         mut,
