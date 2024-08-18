@@ -1,0 +1,19 @@
+[toolchain]
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+basic_storage = "FSgQUnc1qogXqmYz5A4niVAkzWBSgWXECUe6rWa1extb"
+learn_anchor = "7Z16QQG7NkFJxG7aHL73NQUSZ9XvmNj16VLx7HC1FJ1T"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
