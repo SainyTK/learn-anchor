@@ -139,32 +139,32 @@ describe("3-simple-token", () => {
     assert.equal(toBalanceAcc.balance.toNumber(), 100);
   });
 
-  // it("Fail to transfer another 100 token", async () => {
-  //   const amount = new anchor.BN(100);
+  it("Fail to transfer another 100 token", async () => {
+    const amount = new anchor.BN(100);
 
-  //   const fromSeeds = [provider.wallet.publicKey.toBuffer()];
-  //   const [fromAccount] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     fromSeeds,
-  //     program.programId
-  //   );
+    const fromSeeds = [provider.wallet.publicKey.toBuffer()];
+    const [fromAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+      fromSeeds,
+      program.programId
+    );
 
-  //   const toSeeds = [anotherKeypair.publicKey.toBuffer()];
-  //   const [toAccount] = anchor.web3.PublicKey.findProgramAddressSync(
-  //     toSeeds,
-  //     program.programId
-  //   );
+    const toSeeds = [anotherKeypair.publicKey.toBuffer()];
+    const [toAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+      toSeeds,
+      program.programId
+    );
 
-  //   try {
-  //     const tx = await program.methods
-  //       .transfer(anotherKeypair.publicKey, amount)
-  //       .accounts({
-  //         fromAcc: fromAccount,
-  //         toAcc: toAccount,
-  //       })
-  //       .rpc();
-  //     assert.fail("The transaction should have failed");
-  //   } catch (err) {
-  //     assert.equal(err.error.errorCode.code, "InsufficientBalance");
-  //   }
-  // });
+    try {
+      const tx = await program.methods
+        .transfer(amount)
+        .accounts({
+          fromAcc: fromAccount,
+          toAcc: toAccount,
+        })
+        .rpc();
+      assert.fail("The transaction should have failed");
+    } catch (err) {
+      assert.equal(err.error.errorCode.code, "InsufficientBalance");
+    }
+  });
 });

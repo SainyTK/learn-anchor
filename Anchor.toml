@@ -8,6 +8,7 @@ skip-lint = false
 basic_storage = "FSgQUnc1qogXqmYz5A4niVAkzWBSgWXECUe6rWa1extb"
 learn_anchor = "7Z16QQG7NkFJxG7aHL73NQUSZ9XvmNj16VLx7HC1FJ1T"
 mapping_storage = "CyZPQjTKMXF7f6MSite1AAWVTGyPRjVS963mbVStEvZY"
+nested_storage = "5hRP4nKKCL4HXRwCZjUiyi3cmt4Zww3mPfaz1FQQ1naQ"
 simple_token = "mT72RpneNAt9fyfsP6Fj4rb87sTu5eBHBhGsG7cmify"
 
 [registry]
