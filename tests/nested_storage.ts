@@ -2,6 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { assert } from "chai";
 import { NestedStorage } from "../target/types/nested_storage";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 describe("4-nested-storage", () => {
   const provider = anchor.AnchorProvider.env();
@@ -27,7 +28,8 @@ describe("4-nested-storage", () => {
   const getMintPriceSlotTx = async (
     time: number,
     price: number,
-    amount: number
+    amount: number,
+    signer: anchor.web3.PublicKey
   ) => {
     const timeBN = new anchor.BN(time);
     const priceBN = new anchor.BN(price);
@@ -48,6 +50,7 @@ describe("4-nested-storage", () => {
     if (!isExist) {
       const initializeIx = await program.methods
         .initialize(timeBN, priceBN)
+        .accounts({ signer })
         .instruction();
       transaction.add(initializeIx);
     }
@@ -66,14 +69,15 @@ describe("4-nested-storage", () => {
   };
 
   it("Initialized price slot", async () => {
-    const time = Math.floor(new Date().valueOf() / 1000);
+    const time = 10000;
     const price = 60000;
     const amount = 50;
 
     const { transaction: tx, account } = await getMintPriceSlotTx(
       time,
       price,
-      amount
+      amount,
+      provider.publicKey
     );
     await provider.sendAndConfirm(tx);
 
@@ -84,23 +88,92 @@ describe("4-nested-storage", () => {
   });
 
   it("Minted price slot", async () => {
-    const time = Math.floor(new Date().valueOf() / 1000);
-    const price = 60000;
-    const amount = 10;
+    const params1 = {
+      time: 10000,
+      price: 60002,
+      amount: 10,
+    };
+    const params2 = {
+      time: 10002,
+      price: 50000,
+      amount: 10,
+    };
 
     await airdrop(keypairs[0].publicKey, 10);
-    const { transaction, account } = await getMintPriceSlotTx(
-      time,
-      price,
-      amount
+
+    const connection = new anchor.web3.Connection(
+      program.provider.connection.rpcEndpoint
     );
+    const wallet = new anchor.Wallet(keypairs[0]);
+    const provider = new anchor.AnchorProvider(connection, wallet);
 
-    const { blockhash } =
-      await program.provider.connection.getLatestBlockhash();
+    for (let param of [params1, params2]) {
+      const { transaction, account } = await getMintPriceSlotTx(
+        param.time,
+        param.price,
+        param.amount,
+        provider.publicKey
+      );
+      await provider.sendAndConfirm(transaction);
+    }
 
-    transaction.recentBlockhash = blockhash;
-    transaction.feePayer = keypairs[0].publicKey;
-    transaction.sign(keypairs[0]);
-    await provider.sendAndConfirm(transaction, [keypairs[0]]);
+    // Fetch all
+    const accounts = await program.account.priceSlot.all();
+    const cases = [
+      {
+        time: 10000,
+        price: 60000,
+        amount: 50,
+      },
+      {
+        time: 10000,
+        price: 60002,
+        amount: 10,
+      },
+      {
+        time: 10002,
+        price: 50000,
+        amount: 10,
+      },
+    ];
+    accounts.forEach((acc, index) => {
+      const caseValue = cases[index];
+      assert.equal(acc.account.time.toNumber(), caseValue.time)
+      assert.equal(acc.account.price.toNumber(), caseValue.price)
+      assert.equal(acc.account.count.toNumber(), caseValue.amount)
+    });
+
+    const number = 10000; // Example number
+    const buffer = Buffer.alloc(4); // 4 bytes for a 32-bit integer
+    buffer.writeUInt32LE(number, 0); // Write the number to the buffer
+    const encodedBytes = bs58.encode(buffer);
+
+    // Fetch only at time = 10000
+    const filteredAccounts = await program.account.priceSlot.all([
+      {
+        memcmp: {
+          offset: 8,
+          bytes: encodedBytes,
+        },
+      },
+    ]);
+    const filteredCases = [
+      {
+        time: 10000,
+        price: 60000,
+        amount: 50,
+      },
+      {
+        time: 10000,
+        price: 60002,
+        amount: 10,
+      },
+    ];
+    filteredAccounts.forEach((acc, index) => {
+      const caseValue = filteredCases[index];
+      assert.equal(acc.account.time.toNumber(), caseValue.time)
+      assert.equal(acc.account.price.toNumber(), caseValue.price)
+      assert.equal(acc.account.count.toNumber(), caseValue.amount)
+    });
   });
 });
