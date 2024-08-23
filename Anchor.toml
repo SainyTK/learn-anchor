@@ -11,6 +11,7 @@ mapping_storage = "CyZPQjTKMXF7f6MSite1AAWVTGyPRjVS963mbVStEvZY"
 nested_storage = "5hRP4nKKCL4HXRwCZjUiyi3cmt4Zww3mPfaz1FQQ1naQ"
 pyth_oracle = "BWq4y8zqrVAHZbZJFFA9wyTLuMu1dKT6NZyDJ2b6pA1n"
 simple_token = "mT72RpneNAt9fyfsP6Fj4rb87sTu5eBHBhGsG7cmify"
+sol_bank = "HgZ6W25XDTR76TVR4EdSkTkadatCHzcC6UnDyErr2Hff"
 sol_transfer = "6t9QWCJqW6KxsxyCaYnuBaaDyUyZejZA3kEZZEcBQB7q"
 spl_transfer = "EyLth7xqMmRWxxdT3jsA1qZBNWv9deLzvaYTN6SqhUDE"
 
