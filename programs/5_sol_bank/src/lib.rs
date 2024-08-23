@@ -79,6 +79,19 @@ pub mod sol_bank {
     }
 
     // Close bank account, decrease depositor count
+    pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
+        let bank = &mut ctx.accounts.bank;
+        let user_acc = &ctx.accounts.data;
+        let signer = &ctx.accounts.signer;
+
+        // Ensure the account balance is zero before closing
+        require!(user_acc.balance == 0, ProgramError::NonZeroBalance);
+
+        // Decrease the customer count
+        bank.customer_count -= 1;
+
+        Ok(())
+    }
 
     // View function show true if depositor acount is more than 3
 
@@ -163,6 +176,26 @@ pub struct Transfer<'info> {
     pub signer: Signer<'info>,
 }
 
+#[derive(Accounts)]
+pub struct CloseAccount<'info> {
+    #[account(
+        mut,
+        seeds = [],
+        bump
+    )]
+    pub bank: Account<'info, SolBank>,
+    #[account(
+        mut,
+        seeds = [signer.key().as_ref()],
+        bump,
+        close = signer
+    )]
+    pub data: Account<'info, BankAccount>,
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct SolBank {
     pub customer_count: u64,
@@ -177,4 +210,6 @@ pub struct BankAccount {
 pub enum ProgramError {
     #[msg("Insufficient balance")]
     InsufficientBalance,
+    #[msg("Account balance must be zero to close")]
+    NonZeroBalance,
 }
