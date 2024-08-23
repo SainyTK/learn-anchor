@@ -11,7 +11,7 @@ use std::mem::size_of;
 // 6. Keypair can also be initialized via program. This way the called program owns it.
 // 7. PDA owner is assigned when it is used for account initialization via program.
 
-declare_id!("HgZ6W25XDTR76TVR4EdSkTkadatCHzcC6UnDyErr2Hff");
+declare_id!("2TtfrjoAQiDGqXqSSb4K8g9dc6u2t6NhjFsoSKaEU4Z8");
 
 #[program]
 pub mod sol_bank {
@@ -82,7 +82,6 @@ pub mod sol_bank {
     pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
         let user_acc = &ctx.accounts.data;
-        let signer = &ctx.accounts.signer;
 
         // Ensure the account balance is zero before closing
         require!(user_acc.balance == 0, ProgramError::NonZeroBalance);
@@ -93,9 +92,6 @@ pub mod sol_bank {
         Ok(())
     }
 
-    // View function show true if depositor acount is more than 3
-
-    
 }
 
 #[derive(Accounts)]
@@ -116,6 +112,7 @@ pub struct Initialize<'info> {
 #[derive(Accounts)]
 pub struct InitializeBankAccount<'info> {
     #[account(
+        mut,
         seeds = [],
         bump
     )]

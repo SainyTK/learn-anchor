@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("mT72RpneNAt9fyfsP6Fj4rb87sTu5eBHBhGsG7cmify");
+declare_id!("49Y21ERXmx4XwtVNoKDF97z83t9CcEPgX7ePDJPJDbbd");
 
 #[program]
 pub mod simple_token {

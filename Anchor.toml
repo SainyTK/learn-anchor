@@ -5,15 +5,11 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-basic_storage = "FSgQUnc1qogXqmYz5A4niVAkzWBSgWXECUe6rWa1extb"
-learn_anchor = "7Z16QQG7NkFJxG7aHL73NQUSZ9XvmNj16VLx7HC1FJ1T"
-mapping_storage = "CyZPQjTKMXF7f6MSite1AAWVTGyPRjVS963mbVStEvZY"
-nested_storage = "5hRP4nKKCL4HXRwCZjUiyi3cmt4Zww3mPfaz1FQQ1naQ"
-pyth_oracle = "BWq4y8zqrVAHZbZJFFA9wyTLuMu1dKT6NZyDJ2b6pA1n"
-simple_token = "mT72RpneNAt9fyfsP6Fj4rb87sTu5eBHBhGsG7cmify"
-sol_bank = "HgZ6W25XDTR76TVR4EdSkTkadatCHzcC6UnDyErr2Hff"
-sol_transfer = "6t9QWCJqW6KxsxyCaYnuBaaDyUyZejZA3kEZZEcBQB7q"
-spl_transfer = "EyLth7xqMmRWxxdT3jsA1qZBNWv9deLzvaYTN6SqhUDE"
+basic_storage = "FmF6PxiE8RM5xgFvuRoDc9t5SxXPR6uzpEky984NJPYx"
+mapping_storage = "5GqZxN1zoSURmJZPwfigvEKEVexJhNnya4JQmBam96pv"
+nested_storage = "HivorQTcSP2YGdPSpfzZZEB8nxamkgxFgHMjBqk8ttfT"
+simple_token = "49Y21ERXmx4XwtVNoKDF97z83t9CcEPgX7ePDJPJDbbd"
+sol_bank = "2TtfrjoAQiDGqXqSSb4K8g9dc6u2t6NhjFsoSKaEU4Z8"
 
 [registry]
 url = "https://api.apr.dev"

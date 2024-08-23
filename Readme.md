@@ -37,3 +37,5 @@ This is the repository where I learn all basic to complicated concepts of Solana
 16. Transferring SOL from a wallet to a program: `programs/5_sol_bank/src/lib.rs`. Good read: https://www.rareskills.io/post/solana-account-owner
 17. Transferring SOL from a program to an account: `programs/5_sol_bank/src/lib.rs`. 
 18. Checking SOL balance after paying transaction fee: `tests/sol_bank.ts`.
+19. Closing an account: `programs/5_sol_bank/src/lib.rs`.
+20. Using solana-bankrun for test script: `tests/sol_bank.ts`. https://kevinheavey.github.io/solana-bankrun/tutorial/#anchor-integration

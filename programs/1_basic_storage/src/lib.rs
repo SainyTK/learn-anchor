@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("FSgQUnc1qogXqmYz5A4niVAkzWBSgWXECUe6rWa1extb");
+declare_id!("FmF6PxiE8RM5xgFvuRoDc9t5SxXPR6uzpEky984NJPYx");
 
 #[program]
 pub mod basic_storage {

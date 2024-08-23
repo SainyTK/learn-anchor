@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("CyZPQjTKMXF7f6MSite1AAWVTGyPRjVS963mbVStEvZY");
+declare_id!("5GqZxN1zoSURmJZPwfigvEKEVexJhNnya4JQmBam96pv");
 
 #[program]
 pub mod mapping_storage {

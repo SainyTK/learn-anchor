@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use std::mem::size_of;
 
-declare_id!("5hRP4nKKCL4HXRwCZjUiyi3cmt4Zww3mPfaz1FQQ1naQ");
+declare_id!("HivorQTcSP2YGdPSpfzZZEB8nxamkgxFgHMjBqk8ttfT");
 
 #[program]
 pub mod nested_storage {
