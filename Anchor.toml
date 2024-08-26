@@ -10,6 +10,7 @@ mapping_storage = "5GqZxN1zoSURmJZPwfigvEKEVexJhNnya4JQmBam96pv"
 nested_storage = "HivorQTcSP2YGdPSpfzZZEB8nxamkgxFgHMjBqk8ttfT"
 simple_token = "49Y21ERXmx4XwtVNoKDF97z83t9CcEPgX7ePDJPJDbbd"
 sol_bank = "2TtfrjoAQiDGqXqSSb4K8g9dc6u2t6NhjFsoSKaEU4Z8"
+token_bank = "BUQLvDwcBi8qf5PGhkJsPq5fSx6B2LgAA3Bf4dyYEViV"
 
 [registry]
 url = "https://api.apr.dev"
