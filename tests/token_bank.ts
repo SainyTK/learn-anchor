@@ -3,38 +3,16 @@ import { Program } from "@coral-xyz/anchor";
 import { assert } from "chai";
 import { TokenBank } from "../target/types/token_bank";
 import {
-  createAssociatedTokenAccountInstruction,
-  createInitializeMint2Instruction,
-  createMint,
-  createMintToCheckedInstruction,
-  createMintToInstruction,
-  getAccount,
   getAssociatedTokenAddressSync,
-  getMinimumBalanceForRentExemptMint,
-  getOrCreateAssociatedTokenAccount,
-  MINT_SIZE,
-  mintTo,
-  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Metaplex } from "@metaplex-foundation/js";
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
-import { createV1, getCreateV1InstructionDataSerializer, mplTokenMetadata, findMetadataPda } from '@metaplex-foundation/mpl-token-metadata';
 
-import { ProgramTestContext, startAnchor } from "solana-bankrun";
-import { BankrunProvider } from "anchor-bankrun";
-import { BankrunContextWrapper } from "../utils/bankrunConnection";
-import { Umi } from "@metaplex-foundation/umi";
+import tokenBankSDK from "../sdk/token_bank";
 
 describe("6-token-bank", () => {
-  let context: ProgramTestContext;
-  let tester: BankrunContextWrapper;
+  // let context: ProgramTestContext;
+  // let tester: BankrunContextWrapper;
   let program: Program<TokenBank>;
-
-  let TOKEN_METADATA_PROGRAM_ID: anchor.web3.PublicKey = new anchor.web3.PublicKey(
-    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-  );
-  let metaplex: Metaplex;
-  let umi: Umi;
+  let provider: anchor.AnchorProvider;
 
   const keypairs = [
     anchor.web3.Keypair.generate(),
@@ -45,82 +23,55 @@ describe("6-token-bank", () => {
   ];
 
   before(async () => {
-    context = await startAnchor("", [{ name: "token_metadata_program", programId: TOKEN_METADATA_PROGRAM_ID }], []);
-    tester = new BankrunContextWrapper(context);
-    anchor.setProvider(tester.provider);
+    provider = anchor.AnchorProvider.env();
+    anchor.setProvider(provider);
     program = anchor.workspace.TokenBank as Program<TokenBank>;
-
-    // metaplex setup
-    metaplex = Metaplex.make(tester.provider.connection);
-    umi = createUmi(tester.provider.connection.rpcEndpoint).use(mplTokenMetadata())
   });
 
   it("Initialize bank program account", async () => {
-    // const mint = anchor.web3.Keypair.generate();
-    // const mintAuthority = context.payer.publicKey;
-    // const freezeAuthority = context.payer.publicKey;
-    // const decimals = 9;
+    const [mint] = tokenBankSDK.getTokenBankMint(program.programId);
 
-    const [mint] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("bank_mint")],
-      program.programId
+    await program.methods
+      .initialize()
+      .accounts({
+        mint,
+      })
+      .rpc();
+
+    const [tokenBank] = tokenBankSDK.getTokenBankAddress(program.programId);
+    const tokenBankAcc = await program.account.tokenBank.fetch(tokenBank);
+
+    assert.equal(
+      tokenBankAcc.authority.toString(),
+      provider.wallet.publicKey.toString()
     );
-    
-    const metadataAccount = await findMetadataPda(umi, { mint });
-    console.log(metadataAccount[0])
-      // .nfts()
-      // .pdas()
-      // .metadata({ mint });
+  });
 
-    const result = await program.methods.initialize()
-    .accounts({
+  it("Should be able to mint token", async () => {
+    const [mint] = tokenBankSDK.getTokenBankMint(program.programId);
+    const [tokenBank] = tokenBankSDK.getTokenBankAddress(program.programId);
+    const ata = getAssociatedTokenAddressSync(
       mint,
-      metadataAccount: metadataAccount[0],
-      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-    })
-    .rpc();
+      provider.wallet.publicKey
+    );
 
-    console.log(result)
+    const amount = 10;
+    const amountBN = new anchor.BN(amount);
 
-    // const lamports = await getMinimumBalanceForRentExemptMint(
-    //   tester.connection.toConnection()
-    // );
-    // const transaction = new anchor.web3.Transaction().add(
-    //   anchor.web3.SystemProgram.createAccount({
-    //     fromPubkey: context.payer.publicKey,
-    //     newAccountPubkey: mint.publicKey,
-    //     space: MINT_SIZE,
-    //     lamports,
-    //     programId: TOKEN_PROGRAM_ID,
-    //   }),
-    //   createInitializeMint2Instruction(
-    //     mint.publicKey,
-    //     decimals,
-    //     mintAuthority,
-    //     freezeAuthority,
-    //     TOKEN_PROGRAM_ID
-    //   )
-    // );
-    // transaction.recentBlockhash = context.lastBlockhash;
-    // transaction.sign(context.payer, mint);
-    // await context.banksClient.processTransaction(transaction);
+    await program.methods
+      .mintToken(amountBN)
+      .accounts({
+        ata: ata,
+        mint: mint,
+        tokenBank: tokenBank
+      })
+      .rpc();
 
-    // mintPk = mint.publicKey;
-
-    // const seeds = [];
-    // const [bankProgramAcc] = anchor.web3.PublicKey.findProgramAddressSync(
-    //   seeds,
-    //   program.programId
-    // );
-    // await program.methods.initialize(mint.publicKey).rpc();
-    // const accountData = await program.account.tokenBank.fetch(bankProgramAcc);
-
-    // assert.equal(accountData.customerCount.toNumber(), 0);
-    // assert.equal(
-    //   accountData.owner.toBase58(),
-    //   context.payer.publicKey.toBase58()
-    // );
-    // assert.equal(accountData.mint.toBase58(), mint.publicKey.toBase58());
+    const balance = await provider.connection.getTokenAccountBalance(ata);
+    assert.equal(
+      Number(balance.value.amount),
+      amount
+    );
   });
 
   // it("Should be able to mint token", async () => {

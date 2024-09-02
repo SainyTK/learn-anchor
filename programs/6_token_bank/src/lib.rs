@@ -1,5 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token};
+use anchor_spl::{
+    token::{Mint, Token, TokenAccount, MintTo, mint_to},
+    associated_token::AssociatedToken
+};
 use std::mem::size_of;
 
 declare_id!("BUQLvDwcBi8qf5PGhkJsPq5fSx6B2LgAA3Bf4dyYEViV");
@@ -14,89 +17,30 @@ pub mod token_bank {
         Ok(())
     }
 
-    // pub fn initialize_account(ctx: Context<InitializeBankAccount>) -> Result<()> {
-    //     let bank = &mut ctx.accounts.bank;
-    //     bank.customer_count += 1;
-    //     Ok(())
-    // }
+    pub fn mint_token(ctx: Context<MintToken>, amount: u64) -> Result<()> {
+        // PDA seeds and bump to "sign" for CPI
+        let seeds = b"bank_mint".as_ref();
+        let bump = ctx.bumps.mint;
+        let signer: &[&[&[u8]]] = &[&[seeds, &[bump]]];
 
-    // pub fn deposit(ctx: Context<BankAccountAction>, amount: u64) -> Result<()> {
-    //     let user_acc = &mut ctx.accounts.data;
-    //     let signer_acc = &ctx.accounts.signer;
-    //     let bank_acc = &ctx.accounts.bank;
+        // require!(ctx.accounts.signer.key.eq(&ctx.accounts.token_bank.authority), CustomError::OnlyOwner);
 
-    //     let source_acc = &mut ctx.accounts.source;
-    //     let dest_acc = &mut ctx.accounts.destination;
+        // CPI Context
+        let cpi_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            MintTo {
+                mint: ctx.accounts.mint.to_account_info(),
+                to: ctx.accounts.ata.to_account_info(),
+                authority: ctx.accounts.mint.to_account_info(),
+            },
+            signer,
+        );
 
-    //     let token_program = &mut ctx.accounts.token_program;
+        mint_to(cpi_ctx, amount)?;
 
-    //     user_acc.balance += amount;
+        Ok(())
+    }
 
-    //     let mint = &bank_acc.mint;
-    //     let source_account = get_associated_token_address(&signer_acc.key(), &mint);
-    //     let destination_account = get_associated_token_address(&bank_acc.key(), &mint);
-
-    //     require!(source_account == source_acc.key() && destination_account == dest_acc.key(), ProgramError::InvalidTokenAddress);
-
-    //     // Transfer tokens from source to destination
-    //     let cpi_accounts = SplTransfer {
-    //         from: source_acc.to_account_info().clone(),
-    //         to: dest_acc.to_account_info().clone(),
-    //         authority: signer_acc.to_account_info().clone(),
-    //     };
-    //     let cpi_program = token_program.to_account_info();
-
-    //     // Invoke SPL token transfer
-    //     token::transfer(CpiContext::new(cpi_program, cpi_accounts), amount)?;
-
-    //     Ok(())
-    // }
-
-    // pub fn withdraw(ctx: Context<BankAccountAction>, amount: u64) -> Result<()> {
-    //     let user_acc = &mut ctx.accounts.data;
-    //     let signer_acc = &ctx.accounts.signer;
-    //     let bank_acc = &ctx.accounts.bank;
-
-    //     require!(
-    //         user_acc.balance >= amount,
-    //         ProgramError::InsufficientBalance
-    //     );
-    //     user_acc.balance -= amount;
-
-    //     // Transfer sol from program to wallet
-    //     bank_acc.sub_lamports(amount)?;
-    //     signer_acc.add_lamports(amount)?;
-
-    //     Ok(())
-    // }
-
-    // pub fn transfer(ctx: Context<Transfer>, amount: u64) -> Result<()> {
-    //     let from_acc = &mut ctx.accounts.from_acc;
-    //     let to_acc = &mut ctx.accounts.to_acc;
-
-    //     require!(
-    //         from_acc.balance >= amount,
-    //         ProgramError::InsufficientBalance
-    //     );
-    //     from_acc.balance -= amount;
-    //     to_acc.balance += amount;
-    //     Ok(())
-    // }
-
-    // // Close bank account, decrease depositor count
-    // pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
-
-    //     let bank = &mut ctx.accounts.bank;
-    //     let user_acc = &ctx.accounts.data;
-
-    //     // Ensure the account balance is zero before closing
-    //     require!(user_acc.balance == 0, ProgramError::NonZeroBalance);
-
-    //     // Decrease the customer count
-    //     bank.customer_count -= 1;
-
-    //     Ok(())
-    // }
 }
 
 #[derive(Accounts)]
@@ -124,95 +68,33 @@ pub struct Initialize<'info> {
     pub token_program: Program<'info, Token>
 }
 
-// #[derive(Accounts)]
-// pub struct InitializeBankAccount<'info> {
-//     #[account(
-//         mut,
-//         seeds = [],
-//         bump
-//     )]
-//     pub bank: Account<'info, TokenBank>,
-//     #[account(
-//         init,
-//         payer = signer,
-//         space = size_of::<BankAccount>() + 8,
-//         seeds = [b"bank".as_ref(), user.key().as_ref()],
-//         bump
-//     )]
-//     pub data: Account<'info, BankAccount>,
-//     #[account(mut)]
-//     /// CHECK: User can initialize account for other users
-//     pub user: AccountInfo<'info>,
-//     #[account(mut)]
-//     pub signer: Signer<'info>,
-//     pub system_program: Program<'info, System>,
-// }
-
-// #[derive(Accounts)]
-// pub struct BankAccountAction<'info> {
-//     #[account(mut)]
-//     pub source: Account<'info, TokenAccount>,
-//     #[account(mut)]
-//     pub destination: Account<'info, TokenAccount>,
-
-//     #[account(
-//         mut,
-//         seeds = [],
-//         bump
-//     )]
-//     pub bank: Account<'info, TokenBank>,
-//     #[account(
-//         mut,
-//         seeds = [signer.key().as_ref()],
-//         bump
-//     )]
-//     pub data: Account<'info, BankAccount>,
-
-//     #[account(mut)]
-//     pub signer: Signer<'info>,
-//     pub token_program: Program<'info, Token>,
-// }
-
-// #[derive(Accounts)]
-// pub struct Transfer<'info> {
-//     #[account(
-//         mut,
-//         seeds = [to.key().as_ref()],
-//         bump
-//     )]
-//     pub to_acc: Account<'info, BankAccount>,
-//     #[account(
-//         mut,
-//         seeds = [signer.key().as_ref()],
-//         bump
-//     )]
-//     pub from_acc: Account<'info, BankAccount>,
-//     #[account(mut)]
-//     /// CHECK: signer decides who they transfer SOL to
-//     pub to: AccountInfo<'info>,
-//     #[account(mut)]
-//     pub signer: Signer<'info>,
-// }
-
-// #[derive(Accounts)]
-// pub struct CloseAccount<'info> {
-//     #[account(
-//         mut,
-//         seeds = [],
-//         bump
-//     )]
-//     pub bank: Account<'info, TokenBank>,
-//     #[account(
-//         mut,
-//         seeds = [signer.key().as_ref()],
-//         bump,
-//         close = signer
-//     )]
-//     pub data: Account<'info, BankAccount>,
-//     #[account(mut)]
-//     pub signer: Signer<'info>,
-//     pub system_program: Program<'info, System>,
-// }
+#[derive(Accounts)]
+pub struct MintToken<'info> {
+    // Initialize player token account if it doesn't exist
+    #[account(
+        init_if_needed,
+        payer = signer,
+        associated_token::mint = mint,
+        associated_token::authority = signer
+    )]
+    pub ata: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        seeds = [b"bank_mint".as_ref()],
+        bump
+    )]
+    pub mint: Account<'info, Mint>,
+    #[account(
+        seeds = [b"token_bank".as_ref()],
+        bump
+    )]
+    pub token_bank: Account<'info, TokenBank>,
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>
+}
 
 #[account]
 pub struct TokenBank {
@@ -226,11 +108,13 @@ pub struct BankAccount {
 }
 
 #[error_code]
-pub enum ProgramError {
+pub enum CustomError {
     #[msg("Insufficient balance")]
     InsufficientBalance,
     #[msg("Account balance must be zero to close")]
     NonZeroBalance,
     #[msg("Invalid token address")]
     InvalidTokenAddress,
+    #[msg("Only owner")]
+    OnlyOwner
 }

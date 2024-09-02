@@ -1,7 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 
 function getTokenBankAddress(programId: anchor.web3.PublicKey) {
-  const seeds = [Buffer.from(anchor.utils.bytes.utf8.encode("token_bank"))];
+  const seeds = [Buffer.from("token_bank")];
+  return anchor.web3.PublicKey.findProgramAddressSync(seeds, programId);
+}
+
+function getTokenBankMint(programId: anchor.web3.PublicKey) {
+  const seeds = [Buffer.from("bank_mint")];
   return anchor.web3.PublicKey.findProgramAddressSync(seeds, programId);
 }
 
@@ -10,7 +15,7 @@ function getBankAddress(
   programId: anchor.web3.PublicKey
 ) {
   const seeds = [
-    Buffer.from(anchor.utils.bytes.utf8.encode("bank")),
+    Buffer.from("bank"),
     user.toBuffer(),
   ];
   return anchor.web3.PublicKey.findProgramAddressSync(seeds, programId);
@@ -18,6 +23,7 @@ function getBankAddress(
 
 const pda = {
   getTokenBankAddress,
+  getTokenBankMint,
   getBankAddress,
 };
 
