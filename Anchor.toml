@@ -11,6 +11,7 @@ nested_storage = "HivorQTcSP2YGdPSpfzZZEB8nxamkgxFgHMjBqk8ttfT"
 simple_token = "49Y21ERXmx4XwtVNoKDF97z83t9CcEPgX7ePDJPJDbbd"
 sol_bank = "2TtfrjoAQiDGqXqSSb4K8g9dc6u2t6NhjFsoSKaEU4Z8"
 token_bank = "BUQLvDwcBi8qf5PGhkJsPq5fSx6B2LgAA3Bf4dyYEViV"
+token_metadata = "7MZ2ti4hzAEsn3Xp7DecavavHxNKAAfmPZ3qCmgp3hqi"
 
 [registry]
 url = "https://api.apr.dev"
@@ -21,3 +22,12 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 5000
+shutdown_wait = 2000
+upgradeable = false
+
+[[test.genesis]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+program = "tests/fixtures/token_metadata_program.so"

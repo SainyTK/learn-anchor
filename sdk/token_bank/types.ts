@@ -1,0 +1,1 @@
+export * from  '../../target/types/token_bank';
